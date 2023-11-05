@@ -1,0 +1,30 @@
+.track {
+    width: 400px;
+    height: 400px;
+    background-color: #EEE;
+    position: relative;
+    border: 1px solid #AAA;
+}
+
+.beaver {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    left: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.beaver1 {
+    background-image: url('/beaver1.png');
+    top: 20px;
+}
+
+.beaver2 {
+    background-image: url('/beaver2.png');
+    top: 120px;
+}
+.beaver3 {
+    background-image: url('/beaver2.png');
+    top: 220px;
+}
