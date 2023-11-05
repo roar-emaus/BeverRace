@@ -1,9 +1,9 @@
 .track {
-    width: 400px;
+    width: 800px;
     height: 400px;
-    background-color: #EEE;
+    background-color: #eee;
     position: relative;
-    border: 1px solid #AAA;
+    border: 1px solid #aaa;
 }
 
 .beaver {
@@ -13,18 +13,23 @@
     left: 0;
     background-size: contain;
     background-repeat: no-repeat;
+    background-image: url('/beaver1.png');
 }
 
-.beaver1 {
+/* .beaver1 {
     background-image: url('/beaver1.png');
     top: 20px;
 }
 
 .beaver2 {
     background-image: url('/beaver2.png');
-    top: 120px;
+    top: 80px;
 }
 .beaver3 {
     background-image: url('/beaver2.png');
-    top: 220px;
+    top: 120px;
 }
+.beaver4 {
+    background-image: url('/beaver2.png');
+    top: 220px;
+} */
