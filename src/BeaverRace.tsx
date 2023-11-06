@@ -1,69 +1,113 @@
 import React, { useState, useRef } from 'react'
 import './BeaverRace.css'
 import Beaver from './Beaver'
-import { normal } from 'jstat' // Importing a statistics library for normal distribution
+
+function randomNormal(mu = 0, sigma = 1) {
+    let u = 0,
+        v = 0
+    while (u === 0) u = Math.random() // Converting [0,1) to (0,1)
+    while (v === 0) v = Math.random()
+    let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v)
+    num = num * sigma + mu // Adjusting for specified mean and standard deviation
+    return num
+}
+const getBeaverSpeeds = (numBeavers: number) => {
+    return Array.from(
+        { length: numBeavers },
+        () => Math.floor(Math.random() * 3) + 4
+    )
+}
+
+const calculateStandardDeviations = (meanSpeeds: number[]) => {
+    return meanSpeeds.map((meanSpeed) => meanSpeed * 2)
+}
 
 function BeaverRace() {
-    const [beaverPos, setBeaverPos] = useState<number[]>([])
     const [raceInProgress, setRaceInProgress] = useState(false)
-    const [numBeavers, setNumBeavers] = useState(5)
-    const [beaverOdds, setBeaverOdds] = useState<
-        { name: string; odds: number }[]
-    >([])
-    const trackRef = useRef(null) // Ref for the track
+    const [numBeavers, setNumBeavers] = useState(8)
+    const [beaverPos, setBeaverPos] = useState<number[]>([])
+    const [winningBeaver, setWinningBeaver] = useState<number | null>(null)
+    const trackRef = useRef<HTMLDivElement>(null)
+    const raceInterval = useRef<number | null>(null)
 
     React.useEffect(() => {
-        setBeaverPos(Array.from({ length: numBeavers }, () => 0))
-        setBeaverOdds(
-            Array.from({ length: numBeavers }, (_, i) => ({
-                name: `Beaver ${i}`,
-                odds: Math.floor(Math.random() * 10) + 1,
-            }))
-        )
+        setBeaverPos(Array(numBeavers).fill(0))
+        setWinningBeaver(null)
     }, [numBeavers])
 
-    // Convert odds to a mean speed (the lower the odds, the higher the mean speed)
-    const meanSpeeds = beaverOdds.map((beaver) => 10 - beaver.odds / 10)
-    const standardDeviations = meanSpeeds.map((meanSpeed) => meanSpeed / 1) // Adjust this to change variability
     function startRace() {
         setRaceInProgress(true)
-
+        const meanSpeeds = getBeaverSpeeds(numBeavers)
+        const standardDeviations = calculateStandardDeviations(meanSpeeds)
         const finishLine = trackRef.current ? trackRef.current.clientWidth : 0
-
-        const raceInterval = setInterval(() => {
-            setBeaverPos((prevPos) => {
-                const newPos = [...prevPos]
-                for (let i = 0; i < numBeavers; i++) {
-                    newPos[i] += Math.abs(
-                        normal.sample(meanSpeeds[i], standardDeviations[i])
-                    )
-                    if (newPos[i] >= finishLine) {
-                        finishRace(raceInterval, i)
-                        return prevPos
+        raceInterval.current = window.setInterval(() => {
+            // const raceInterval = setInterval(() => {
+            setBeaverPos((prevPos) =>
+                prevPos.map((pos, index) => {
+                    const newPos =
+                        pos +
+                        Math.abs(
+                            randomNormal(
+                                meanSpeeds[index],
+                                standardDeviations[index]
+                            )
+                        )
+                    if (newPos >= finishLine) {
+                        finishRace(index)
                     }
-                }
-                return newPos
-            })
+                    return newPos >= finishLine ? finishLine : newPos
+                })
+            )
         }, 100)
     }
-
-    function finishRace(raceInterval: number, winningBeaver: number) {
-        clearInterval(raceInterval)
+    function resetRace() {
         setRaceInProgress(false)
-        alert(`Beaver ${winningBeaver} wins!`)
+        setBeaverPos(Array(numBeavers).fill(0))
+        setWinningBeaver(null)
+    }
+
+    function finishRace(winningBeaver: number) {
+        setRaceInProgress(false)
+        clearInterval(raceInterval.current!)
+        raceInterval.current = null
+        setWinningBeaver(winningBeaver)
     }
 
     return (
         <div>
+            <label htmlFor="numBeavers">Antall bevere:</label>
+            <select
+                id="numBeavers"
+                value={numBeavers}
+                onChange={(e) => setNumBeavers(Number(e.target.value))}
+                disabled={raceInProgress}
+            >
+                {Array.from({ length: 7 }, (_, i) => i + 2).map((number) => (
+                    <option key={number} value={number}>
+                        {number}
+                    </option>
+                ))}
+            </select>
             <div className={`track`} ref={trackRef}>
                 {Array.from({ length: numBeavers }, (_, i) => (
                     <Beaver key={i} beaverNumber={i} pos={beaverPos[i]} />
                 ))}
             </div>
-            {raceInProgress ? (
-                <button disabled>...</button>
-            ) : (
-                <button onClick={startRace}>Start Race</button>
+            {winningBeaver !== null && (
+                <div className="winnerOverlay">
+                    <img
+                        src={`/beaver${winningBeaver % 8}.png`}
+                        className="winningBeaverImage"
+                        alt={`Beaver ${winningBeaver} is the winner!`}
+                    />
+                    <div className="blinkingText">Vant!</div>
+                </div>
+            )}
+            {!raceInProgress && (
+                <div>
+                    <button onClick={startRace}>Start</button>
+                    <button onClick={resetRace}>Ny runde</button>
+                </div>
             )}
         </div>
     )

@@ -1,6 +1,6 @@
 .track {
-    width: 800px;
-    height: 400px;
+    width: 1000px;
+    height: 500px;
     background-color: #eee;
     position: relative;
     border: 1px solid #aaa;
@@ -8,7 +8,7 @@
 
 .beaver {
     width: 50px;
-    height: 50px;
+    height: 500px;
     position: absolute;
     left: 0;
     background-size: contain;
@@ -16,20 +16,44 @@
     background-image: url('/beaver1.png');
 }
 
-/* .beaver1 {
-    background-image: url('/beaver1.png');
-    top: 20px;
+@keyframes growShrink {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
 }
 
-.beaver2 {
-    background-image: url('/beaver2.png');
-    top: 80px;
+@keyframes blink {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
 }
-.beaver3 {
-    background-image: url('/beaver2.png');
-    top: 120px;
+
+.winnerOverlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
 }
-.beaver4 {
-    background-image: url('/beaver2.png');
-    top: 220px;
-} */
+
+.winningBeaverImage {
+    animation: growShrink 2s infinite; /* Grow and shrink animation */
+    width: 150px; /* Larger size */
+    height: 150px;
+}
+
+.blinkingText {
+    animation: blink 1s infinite; /* Blinking animation */
+    color: rgb(17, 10, 219);
+    font-size: 2em;
+    font-weight: bold;
+    margin-top: 20px; /* Spacing from the image */
+}
