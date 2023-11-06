@@ -92,6 +92,7 @@ function BeaverRace() {
                 {Array.from({ length: numBeavers }, (_, i) => (
                     <Beaver key={i} beaverNumber={i} pos={beaverPos[i]} />
                 ))}
+                <div className="finish-line"></div>
             </div>
             {winningBeaver !== null && (
                 <div className="winnerOverlay">
