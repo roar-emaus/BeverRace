@@ -2,6 +2,17 @@ import React, { useState, useRef } from 'react'
 import './BeaverRace.css'
 import Beaver from './Beaver'
 
+const beaverNames: { [key: number]: string } = {
+    0: 'Scarlet Sprinter',
+    1: 'Kastanje Kvikkløp',
+    2: 'Jernjagern',
+    3: 'Jetstrøm Jerry',
+    4: 'Spektrum Sprinter',
+    5: 'Indigo Iver',
+    6: 'Gokart Gustav',
+    7: 'Taijutsu Torstein',
+}
+
 function randomNormal(mu = 0, sigma = 1) {
     let u = 0,
         v = 0
@@ -32,33 +43,38 @@ function BeaverRace() {
 
     React.useEffect(() => {
         setBeaverPos(Array(numBeavers).fill(0))
+        setRaceInProgress(false)
         setWinningBeaver(null)
     }, [numBeavers])
 
     function startRace() {
         setRaceInProgress(true)
-        const meanSpeeds = getBeaverSpeeds(numBeavers)
-        const standardDeviations = calculateStandardDeviations(meanSpeeds)
         const finishLine = trackRef.current ? trackRef.current.clientWidth : 0
-        raceInterval.current = window.setInterval(() => {
-            // const raceInterval = setInterval(() => {
-            setBeaverPos((prevPos) =>
-                prevPos.map((pos, index) => {
-                    const newPos =
-                        pos +
-                        Math.abs(
-                            randomNormal(
-                                meanSpeeds[index],
-                                standardDeviations[index]
+        new Promise<number>((resolve) => {
+            raceInterval.current = window.setInterval(() => {
+                setBeaverPos((prevPos) =>
+                    prevPos.map((pos, index) => {
+                        const meanSpeeds = getBeaverSpeeds(numBeavers)
+                        const standardDeviations =
+                            calculateStandardDeviations(meanSpeeds)
+                        const newPos =
+                            pos +
+                            Math.abs(
+                                randomNormal(
+                                    meanSpeeds[index],
+                                    standardDeviations[index]
+                                )
                             )
-                        )
-                    if (newPos >= finishLine) {
-                        finishRace(index)
-                    }
-                    return newPos >= finishLine ? finishLine : newPos
-                })
-            )
-        }, 100)
+                        if (newPos >= finishLine) {
+                            resolve(index)
+                        }
+                        return newPos >= finishLine ? finishLine : newPos
+                    })
+                )
+            }, 100)
+        }).then((winningBeaver: number) => {
+            finishRace(winningBeaver)
+        })
     }
     function resetRace() {
         setRaceInProgress(false)
@@ -101,7 +117,9 @@ function BeaverRace() {
                         className="winningBeaverImage"
                         alt={`Beaver ${winningBeaver} is the winner!`}
                     />
-                    <div className="blinkingText">Vant!</div>
+                    <div className="blinkingText">
+                        {beaverNames[winningBeaver]} vant!
+                    </div>
                 </div>
             )}
             {!raceInProgress && (
